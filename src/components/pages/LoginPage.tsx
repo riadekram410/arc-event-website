@@ -69,7 +69,9 @@ export default function LoginPage() {
         if (res?.error) {
           setError('Invalid email or password.');
         } else {
-          if (email.toLowerCase() === 'admin@gmail.com') {
+          const sessionRes = await fetch('/api/auth/session');
+          const session = await sessionRes.json();
+          if (session?.user?.role === 'admin') {
             window.location.href = '/admin';
           } else {
             window.location.href = '/dashboard';

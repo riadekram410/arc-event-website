@@ -78,11 +78,14 @@ async function main() {
   }
 
   // 8. Seed Default Admin User
-  // Password hash for 'admin123' using bcrypt (pre-calculated to avoid compile-time bcrypt dependency)
+  const bcrypt = require('bcryptjs');
+  const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+  const hashedPassword = bcrypt.hashSync(adminPassword, 10);
+  
   const defaultAdmin = {
     name: 'AUSTRC Administrator',
-    email: 'admin@gmail.com',
-    passwordHash: '$2b$10$Y145pXQ2GzZ2uLp1Y/u7f.X6d91y.wW/y/RzCpe1y4LpY/u7f.X6d', // bcrypt hash for 'admin123'
+    email: process.env.ADMIN_EMAIL || 'admin@gmail.com',
+    passwordHash: hashedPassword,
     role: 'admin',
     avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&q=80'
   };

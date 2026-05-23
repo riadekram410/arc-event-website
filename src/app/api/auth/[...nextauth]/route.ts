@@ -18,7 +18,7 @@ export const authOptions: NextAuthOptions = {
           name: profile.name,
           email: profile.email,
           image: profile.picture,
-          role: profile.email === "admin@gmail.com" ? "admin" : "user",
+          role: profile.email === (process.env.ADMIN_EMAIL || "admin@gmail.com") ? "admin" : "user",
         };
       },
     }),
