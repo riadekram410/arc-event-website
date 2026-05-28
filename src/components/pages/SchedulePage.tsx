@@ -15,12 +15,18 @@ interface DatabaseScheduleItem {
   segment: { id: number; name: string } | null;
 }
 
-export default function SchedulePage() {
+export default function SchedulePage({ dbSchedule }: { dbSchedule?: any[] }) {
   const [events, setEvents] = useState<DatabaseScheduleItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeDay, setActiveDay] = useState('Day 1');
 
   useEffect(() => {
+    if (dbSchedule && dbSchedule.length > 0) {
+      setEvents(dbSchedule);
+      setLoading(false);
+      return;
+    }
+
     async function fetchSchedule() {
       try {
         const res = await fetch('/api/schedule');
@@ -34,7 +40,7 @@ export default function SchedulePage() {
       }
     }
     fetchSchedule();
-  }, []);
+  }, [dbSchedule]);
 
   const formatTime = (dateStr: string) => {
     return new Date(dateStr).toLocaleTimeString('en-US', {

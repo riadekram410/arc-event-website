@@ -85,10 +85,34 @@ const eventData: any = {
   },
 };
 
-export default function EventDetailsPage() {
+export default function EventDetailsPage({ dbSegment }: { dbSegment?: any }) {
   const { id } = useParams();
   const navigate = useNavigate();
-  const event = eventData[id || '1'];
+
+  const fallback = dbSegment
+    ? (eventData[dbSegment.id] || Object.values(eventData).find((x: any) => x.title.toLowerCase() === dbSegment.name.toLowerCase()) || eventData['1'])
+    : null;
+
+  const event = dbSegment
+    ? {
+        id: dbSegment.id,
+        title: dbSegment.name,
+        tagline: fallback.tagline,
+        category: fallback.category,
+        image: dbSegment.imageUrl || fallback.image,
+        schedule: fallback.schedule,
+        location: fallback.location,
+        deadline: fallback.deadline,
+        prizePool: {
+          champion: dbSegment.prizePool || fallback.prizePool.champion,
+          runnerUp: fallback.prizePool.runnerUp,
+        },
+        teamSize: fallback.teamSize,
+        fee: fallback.fee,
+        description: dbSegment.description,
+        highlights: fallback.highlights,
+      }
+    : eventData[id || '1'];
 
   if (!event) {
     return (
