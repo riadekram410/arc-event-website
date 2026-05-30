@@ -21,10 +21,33 @@ const allSegments = [
 
 const filters = ['All', 'Solo', 'Team', 'Autonomous', 'Manual'];
 
-export default function SegmentsPage() {
+export default function SegmentsPage({ dbSegments }: { dbSegments?: any[] }) {
   const [activeFilter, setActiveFilter] = useState('All');
 
-  const filteredSegments = allSegments.filter(s => {
+  const segments = dbSegments && dbSegments.length > 0
+    ? dbSegments.map(s => {
+        const fallback = allSegments.find(x => x.title.toLowerCase() === s.name.toLowerCase() || x.id === s.id) || allSegments[0];
+        return {
+          id: s.id,
+          title: s.name,
+          desc: s.description,
+          type: fallback.type,
+          difficulty: fallback.difficulty,
+          icon: fallback.icon,
+          size: fallback.size,
+          team: fallback.team,
+          fee: fallback.fee,
+          prize: s.prizePool || fallback.prize,
+          filter: fallback.filter,
+          schedule: fallback.schedule,
+          location: fallback.location,
+          deadline: fallback.deadline,
+          image: s.imageUrl || fallback.image,
+        };
+      })
+    : allSegments;
+
+  const filteredSegments = segments.filter(s => {
     if (activeFilter === 'All') return true;
     if (activeFilter === 'Solo' || activeFilter === 'Team') return s.type === activeFilter;
     if (activeFilter === 'Autonomous' || activeFilter === 'Manual') return s.filter === activeFilter;
