@@ -1,37 +1,76 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-
-const FEE_MAP: Record<string, number> = {
-  "Robo Soccer": 500,
-  "Line Follower": 400,
-  "Drone Race": 1000,
-  "Sumo Bot": 600,
-  "Combat Robotics": 1500,
-};
+import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/admin-guard";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    console.log("DASHBOARD API SESSION:", JSON.stringify(session));
-    if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    // Step 1: Check admin session
+    const session = await requireAdmin();
+    if (!session) {
+      return NextResponse.json({ message: "Not authorized" }, { status: 401 });
     }
 
-    // 1. Basic Stats
+    // Step 2: Fetch stats from database
+    const totalUsers = await prisma.user.count();
     const totalRegistrations = await prisma.registration.count();
-    const pendingApprovals = await prisma.registration.count({
+    const pendingRegistrations = await prisma.registration.count({
       where: { status: "pending" },
     });
     const activeSegments = await prisma.segment.count({
       where: { status: "active" },
     });
 
-    // 2. Revenue Calculation (Paid registrations * Segment fee)
-    const paidRegistrations = await prisma.registration.findMany({
-      where: { paymentStatus: "paid" },
+    // Step 3: Registration trends: group by day for the chart (past 7 days)
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 6);
+    startDate.setHours(0, 0, 0, 0);
+
+    const trendRegistrations = await prisma.registration.findMany({
+      where: {
+        createdAt: {
+          gte: startDate,
+        },
+      },
       select: {
+        createdAt: true,
+      },
+    });
+
+    const trends = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
+
+      const start = new Date(d);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(d);
+      end.setHours(23, 59, 59, 999);
+
+      const count = trendRegistrations.filter((r) => {
+        const rTime = r.createdAt.getTime();
+        return rTime >= start.getTime() && rTime <= end.getTime();
+      }).length;
+
+      trends.push({
+        id: dayName.toLowerCase(),
+        name: dayName,
+        registrations: count,
+      });
+    }
+
+    // Step 4: Fetch latest registrations for recent activity feed
+    const recentRegistrations = await prisma.registration.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 5,
+      include: {
+        user: {
+          select: {
+            name: true,
+          },
+        },
         segment: {
           select: {
             name: true,
@@ -40,74 +79,19 @@ export async function GET() {
       },
     });
 
-    let totalRevenue = 0;
-    paidRegistrations.forEach((reg) => {
-      const segmentName = reg.segment?.name || "";
-      const fee = FEE_MAP[segmentName] ?? 500;
-      totalRevenue += fee;
-    });
-
-    // 3. Additional Info
-    const totalUsers = await prisma.user.count();
-    const unpaidRegistrations = await prisma.registration.count({
-      where: { paymentStatus: "unpaid" },
-    });
-    const totalSponsors = await prisma.sponsor.count();
-    const totalFAQ = await prisma.fAQ.count();
-
-    // 4. Registration Trends (Last 7 Days)
-    const registrationTrends = [];
-    const now = new Date();
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(now.getDate() - i);
-      d.setHours(0, 0, 0, 0);
-
-      const nextDay = new Date(d);
-      nextDay.setDate(d.getDate() + 1);
-
-      const count = await prisma.registration.count({
-        where: {
-          createdAt: {
-            gte: d,
-            lt: nextDay,
-          },
-        },
-      });
-
-      const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
-      registrationTrends.push({
-        name: dayName,
-        registrations: count,
-      });
-    }
-
-    // 5. Recent Activities
-    const recentActivities = await prisma.activity.findMany({
-      orderBy: { time: "desc" },
-      take: 10,
-    });
-
+    // Step 5: Return response
     return NextResponse.json({
-      stats: {
-        totalRegistrations,
-        totalRevenue,
-        pendingApprovals,
-        activeSegments,
-      },
-      additionalInfo: {
-        totalUsers,
-        unpaidRegistrations,
-        totalSponsors,
-        totalFAQ,
-      },
-      registrationTrends,
-      recentActivities,
+      totalUsers,
+      totalRegistrations,
+      pendingRegistrations,
+      activeSegments,
+      trends,
+      recentRegistrations,
     });
   } catch (error) {
-    console.error("Failed to fetch admin dashboard stats:", error);
+    console.error("Failed to fetch dashboard stats:", error);
     return NextResponse.json(
-      { message: "Internal Server Error" },
+      { message: "Internal server error" },
       { status: 500 }
     );
   }
