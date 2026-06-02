@@ -266,13 +266,12 @@ export default function AdminSettingsPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${mutedText}`}>Deadline (YYYY-MM-DD)</label>
+                  <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${mutedText}`}>Deadline (Date & Time)</label>
                   <input
-                    type="text"
-                    value={settings.registration_deadline}
+                    type="datetime-local"
+                    value={settings.registration_deadline ? (settings.registration_deadline.includes('T') ? settings.registration_deadline : `${settings.registration_deadline}T23:59`) : ''}
                     onChange={(e) => handleInputChange('registration_deadline', e.target.value)}
                     className={inputStyle}
-                    placeholder="2026-06-10"
                   />
                 </div>
                 <div>

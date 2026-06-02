@@ -8,7 +8,7 @@ const DEFAULT_SETTINGS: Record<string, string> = {
   contact_phone: '+880 1700-000000',
   registration_status: 'open',
   max_teams: '500',
-  registration_deadline: '2026-06-10',
+  registration_deadline: '2026-06-10T23:59',
   min_members_per_team: '1',
   max_members_per_team: '5',
   enable_leaderboard: 'true',

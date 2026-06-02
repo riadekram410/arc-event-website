@@ -14,6 +14,13 @@ export default function RegisterPage() {
     minMembers: 1,
     maxMembers: 5,
   });
+  const [timeLeft, setTimeLeft] = useState<{
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  } | null>(null);
+  const [deadlineDate, setDeadlineDate] = useState<Date | null>(null);
 
   const [formData, setFormData] = useState({
     teamName: '',
@@ -52,6 +59,19 @@ export default function RegisterPage() {
             router.push('/disable_reg');
             return;
           }
+
+          if (deadline) {
+            setDeadlineDate(deadline);
+            // Calculate initial time left immediately
+            const difference = deadline.getTime() - Date.now();
+            if (difference > 0) {
+              const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+              const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+              const minutes = Math.floor((difference / 1000 / 60) % 60);
+              const seconds = Math.floor((difference / 1000) % 60);
+              setTimeLeft({ days, hours, minutes, seconds });
+            }
+          }
           
           setEventDetails({
             eventName: settings.event_name || 'ARC 3.0',
@@ -68,6 +88,28 @@ export default function RegisterPage() {
     }
     checkRegistration();
   }, [router]);
+
+  useEffect(() => {
+    if (!deadlineDate) return;
+
+    const interval = setInterval(() => {
+      const difference = deadlineDate.getTime() - Date.now();
+      
+      if (difference <= 0) {
+        clearInterval(interval);
+        setTimeLeft(null);
+        router.push('/closed_reg');
+      } else {
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((difference / 1000 / 60) % 60);
+        const seconds = Math.floor((difference / 1000) % 60);
+        setTimeLeft({ days, hours, minutes, seconds });
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [deadlineDate, router]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,6 +164,27 @@ export default function RegisterPage() {
             <p className="text-gray-400">
               Join Bangladesh's most anticipated university robotics championship
             </p>
+
+            {timeLeft && (
+              <div className="mt-6 space-y-2 animate-in fade-in duration-500">
+                <span className="text-xs font-semibold text-[#a3b18a]/80 uppercase tracking-widest block">Registration Closes In</span>
+                <div className="flex justify-center gap-3">
+                  {[
+                    { label: 'Days', value: timeLeft.days },
+                    { label: 'Hours', value: timeLeft.hours },
+                    { label: 'Mins', value: timeLeft.minutes },
+                    { label: 'Secs', value: timeLeft.seconds }
+                  ].map((t, i) => (
+                    <div key={i} className="w-16 h-16 bg-[#111116]/90 border border-white/[0.07] rounded-xl flex flex-col items-center justify-center shadow-[0_4px_20px_rgba(0,0,0,0.25)]">
+                      <div className="text-[#a3b18a] font-bold text-xl font-mono leading-none">
+                        {String(t.value).padStart(2, '0')}
+                      </div>
+                      <div className="text-[10px] text-gray-500 font-semibold tracking-wider mt-1 uppercase">{t.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Registration Form */}
