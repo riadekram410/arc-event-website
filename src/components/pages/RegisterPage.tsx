@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
-import { ArrowRight, ShieldCheck, User, Phone, Building2, Users, Trophy, Mail, Loader2 } from 'lucide-react';
+import { ArrowRight, ShieldCheck, User, Phone, Building2, Users, Trophy, Mail, Loader2, Lock, Eye, EyeOff } from 'lucide-react';
 import { Link } from '@/lib/router-compat';
 
 export default function RegisterPage() {
@@ -30,7 +30,11 @@ export default function RegisterPage() {
     phone: '',
     members: '',
     segment: '',
+    password: '',
+    confirmPassword: '',
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [dbSegments, setDbSegments] = useState<Array<{ id: number; name: string }>>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -118,14 +122,32 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.password) {
+      alert('Password is required.');
+      return;
+    }
+    if (formData.password.length < 8) {
+      alert('Password must be at least 8 characters.');
+      return;
+    }
+    if (!formData.confirmPassword) {
+      alert('Please confirm your password.');
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      alert('Passwords do not match.');
+      return;
+    }
     setSubmitting(true);
     try {
+      const payload = { ...formData };
+      // Remove confirmPassword before sending
+      const { confirmPassword, ...bodyToSend } = payload;
+      void confirmPassword; // suppress unused variable lint
       const res = await fetch('/api/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bodyToSend),
       });
 
       const data = await res.json();
@@ -324,6 +346,68 @@ export default function RegisterPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Password Fields */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+                    Password *
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      id="password"
+                      name="password"
+                      required
+                      minLength={8}
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="w-full bg-[#18181f] border border-white/[0.07] rounded-lg px-12 py-3 text-[#F5F5F0] placeholder:text-[#5A5A52] focus:outline-none focus:border-[#588157] transition-colors"
+                      style={{ fontSize: '16px' }}
+                      placeholder="Min 8 characters"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-2">
+                    Confirm Password *
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      required
+                      minLength={8}
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className="w-full bg-[#18181f] border border-white/[0.07] rounded-lg px-12 py-3 text-[#F5F5F0] placeholder:text-[#5A5A52] focus:outline-none focus:border-[#588157] transition-colors"
+                      style={{ fontSize: '16px' }}
+                      placeholder="Repeat your password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-[#5A5A52] -mt-2">
+                Use this password to log in to your dashboard later.
+              </p>
 
               {/* Number of Members */}
               <div>
