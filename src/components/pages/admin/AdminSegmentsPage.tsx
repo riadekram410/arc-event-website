@@ -64,7 +64,14 @@ export default function AdminSegmentsPage() {
       setLoading(true);
       const response = await fetch('/api/admin/segments');
       const data = await response.json();
-      setSegments(data);
+      
+      if (data && data.success && data.data && Array.isArray(data.data.items)) {
+        setSegments(data.data.items);
+      } else if (Array.isArray(data)) {
+        setSegments(data);
+      } else {
+        setSegments([]);
+      }
     } catch (error) {
       console.error('Failed to fetch segments:', error);
       toast.error('Failed to load segments');
