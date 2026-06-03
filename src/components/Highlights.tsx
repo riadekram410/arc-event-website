@@ -126,7 +126,7 @@ export const Highlights = ({ dbPhotos }: { dbPhotos?: string[] }) => {
 
         {/* Mobile: single column */}
         <div className="flex flex-col gap-4 md:hidden">
-          {photos.slice(0, 4).map((src, i) => (
+          {activePhotos.slice(0, 4).map((src, i) => (
             <div
               key={i}
               className="relative overflow-hidden group cursor-pointer"
@@ -152,7 +152,7 @@ export const Highlights = ({ dbPhotos }: { dbPhotos?: string[] }) => {
                   border: '1px solid rgba(88,129,87,0.15)',
                 }}
               >
-                <p className="text-[#6a8a6a] text-[11px] uppercase tracking-[0.12em] font-medium">{galleryLabels[i]}</p>
+                <p className="text-[#6a8a6a] text-[11px] uppercase tracking-[0.12em] font-medium">{galleryLabels[i % galleryLabels.length]}</p>
               </div>
             </div>
           ))}
@@ -164,7 +164,7 @@ export const Highlights = ({ dbPhotos }: { dbPhotos?: string[] }) => {
           <div className="relative h-full overflow-hidden rounded-[20px]">
             <motion.div
               className="flex flex-col gap-5"
-              animate={{ y: [0, -50 * leftColumnPhotos.length] }}
+              animate={{ y: ["0%", "-50%"] }}
               transition={{ duration: 42, repeat: Infinity, repeatType: 'loop', ease: 'linear' }}
             >
               {leftColumnPhotos.map((src, i) => (
@@ -209,7 +209,7 @@ export const Highlights = ({ dbPhotos }: { dbPhotos?: string[] }) => {
           <div className="relative h-full overflow-hidden rounded-[20px]">
             <motion.div
               className="flex flex-col gap-5"
-              animate={{ y: [-50 * middleColumnPhotos.length, 0] }}
+              animate={{ y: ["-50%", "0%"] }}
               transition={{ duration: 42, repeat: Infinity, repeatType: 'loop', ease: 'linear' }}
             >
               {middleColumnPhotos.map((src, i) => (
@@ -264,7 +264,7 @@ export const Highlights = ({ dbPhotos }: { dbPhotos?: string[] }) => {
           <div className="relative h-full overflow-hidden rounded-[20px]">
             <motion.div
               className="flex flex-col gap-5"
-              animate={{ y: [0, -50 * rightColumnPhotos.length] }}
+              animate={{ y: ["0%", "-50%"] }}
               transition={{ duration: 42, repeat: Infinity, repeatType: 'loop', ease: 'linear' }}
             >
               {rightColumnPhotos.map((src, i) => (
