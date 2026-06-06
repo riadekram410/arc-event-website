@@ -6,6 +6,7 @@ import { Link, useLocation } from '@/lib/router-compat';
 import { useResolvedTheme } from '@/hooks/useResolvedTheme';
 import { ThemeSwitch } from './ThemeSwitch';
 import { AnimatedMenuButton } from './AnimatedMenuButton';
+import { useSession } from 'next-auth/react';
 
 export const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -14,6 +15,9 @@ export const Navbar = () => {
   const navRefs = React.useRef<(HTMLAnchorElement | null)[]>([]);
   const location = useLocation();
   const { setTheme, isDark } = useResolvedTheme();
+  const { data: session, status } = useSession();
+  const isLoggedIn = status === 'authenticated';
+  const userImage = session?.user?.image || 'https://res.cloudinary.com/dxyhzgrul/image/upload/v1780398181/silver-membership-icon-default-avatar-profile-icon-membership-icon-social-media-user-image-vector-illustration_561158-4215_bdeofc.jpg';
 
   useEffect(() => {
     const handleScroll = () => { };
@@ -150,22 +154,42 @@ export const Navbar = () => {
               <ThemeSwitch />
             </div>
 
-            {/* Login — hidden at ≤1140px (moves to sidebar) */}
-            <Link
-              to="/login"
-              className={`hidden min-[1141px]:inline-flex text-sm font-medium transition-colors ${isDark ? 'text-[#9A9A8E] hover:text-[#F5F5F0]' : 'text-[#4a4a40] hover:text-[#1a1a14]'
-                }`}
-            >
-              Login
-            </Link>
+            {isLoggedIn ? (
+              <Link to="/dashboard" className="hidden min-[1141px]:flex items-center gap-3 group relative z-10 transition-transform hover:scale-105">
+                <div className="relative w-10 h-10 rounded-full overflow-hidden border border-[#588157]/40 group-hover:border-[#588157] transition-all shadow-[0_2px_10px_rgba(0,0,0,0.2)]">
+                  <img
+                    src={userImage}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://res.cloudinary.com/dxyhzgrul/image/upload/v1780398181/silver-membership-icon-default-avatar-profile-icon-membership-icon-social-media-user-image-vector-illustration_561158-4215_bdeofc.jpg';
+                    }}
+                  />
+                </div>
+                <span className={`text-sm font-medium ${isDark ? 'text-[#9A9A8E] group-hover:text-[#F5F5F0]' : 'text-[#4a4a40] group-hover:text-[#1a1a14]'} transition-colors`}>
+                  
+                </span>
+              </Link>
+            ) : (
+              <>
+                {/* Login — hidden at ≤1140px (moves to sidebar) */}
+                <Link
+                  to="/login"
+                  className={`hidden min-[1141px]:inline-flex text-sm font-medium transition-colors ${isDark ? 'text-[#9A9A8E] hover:text-[#F5F5F0]' : 'text-[#4a4a40] hover:text-[#1a1a14]'
+                    }`}
+                >
+                  Login
+                </Link>
 
-            {/* Register Now — always visible */}
-            <Link
-              to="/register"
-              className="inline-flex items-center bg-[#3a5a40] text-white px-[22px] py-2.5 rounded-full text-sm font-bold hover:bg-[#344e41] transition-all"
-            >
-              Register Now
-            </Link>
+                {/* Register Now — always visible */}
+                <Link
+                  to="/register"
+                  className="inline-flex items-center bg-[#3a5a40] text-white px-[22px] py-2.5 rounded-full text-sm font-bold hover:bg-[#344e41] transition-all"
+                >
+                  Register Now
+                </Link>
+              </>
+            )}
 
             {/* Hamburger — hidden above 1140px */}
             <div className="flex min-[1141px]:hidden">
@@ -270,18 +294,37 @@ export const Navbar = () => {
                   <ThemeSwitch />
                 </div>
 
-                {/* Login Button */}
-                <Link
-                  to="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center justify-center h-[48px] rounded-xl border font-medium transition-all ${isDark
-                      ? 'bg-white/[0.03] border-white/[0.08] text-[#F5F5F0] hover:bg-white/[0.06]'
-                      : 'bg-black/[0.03] border-black/[0.08] text-[#1a1a14] hover:bg-black/[0.06]'
-                    }`}
-                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                >
-                  Login
-                </Link>
+                {/* Login/Dashboard Button */}
+                {isLoggedIn ? (
+                  <Link
+                    to="/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-center h-[48px] rounded-xl font-bold bg-[#3a5a40] text-white hover:bg-[#344e41] transition-all gap-3 shadow-[0_2px_12px_rgba(58,90,64,0.25)] border border-[#588157]/20"
+                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                  >
+                    <img
+                      src={userImage}
+                      alt="Profile"
+                      className="w-6 h-6 rounded-full object-cover border border-white/20"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://res.cloudinary.com/dxyhzgrul/image/upload/v1780398181/silver-membership-icon-default-avatar-profile-icon-membership-icon-social-media-user-image-vector-illustration_561158-4215_bdeofc.jpg';
+                      }}
+                    />
+                    Dashboard
+                  </Link>
+                ) : (
+                  <Link
+                    to="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center justify-center h-[48px] rounded-xl border font-medium transition-all ${isDark
+                        ? 'bg-white/[0.03] border-white/[0.08] text-[#F5F5F0] hover:bg-white/[0.06]'
+                        : 'bg-black/[0.03] border-black/[0.08] text-[#1a1a14] hover:bg-black/[0.06]'
+                      }`}
+                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                  >
+                    Login
+                  </Link>
+                )}
               </div>
             </motion.div>
           </>
