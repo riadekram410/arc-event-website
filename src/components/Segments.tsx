@@ -23,7 +23,14 @@ const ICONS: { [key: number]: React.ReactNode } = {
   6: <Grid className="w-16 h-16" />,
 };
 
-export const Segments = () => {
+const DUMMY_SEGMENTS: SegmentData[] = [
+  { id: 1, name: 'Robo Soccer', description: 'Build and program autonomous or manual robots to compete in a high-stakes soccer tournament on a custom arena.', rules: '1. Robots must fit within dimensions. 2. Manual control via wireless RF. 3. No damage to arena.', prizePool: '৳20,000', status: 'active', imageUrl: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=80' },
+  { id: 2, name: 'Line Follower', description: 'Optimize your algorithms for the fastest time across complex track layouts with sharp turns and intersections.', rules: '1. Autonomous control only. 2. Max weight 1kg. 3. Time trial base scoring.', prizePool: '৳15,000', status: 'active', imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80' },
+  { id: 3, name: 'Drone Race', description: 'Navigate aerial obstacles in a high-speed FPV drone racing championship.', rules: '1. Quadcopter design only. 2. Safety nets active. 3. FPV video feed mandatory.', prizePool: '৳50,000', status: 'active', imageUrl: 'https://images.unsplash.com/photo-1473968512647-3e447244af8f?w=800&q=80' },
+  { id: 4, name: 'Sumo Bot', description: 'Push the opponent out of the ring. Pure torque and grip.', rules: '1. Auton/Manual options. 2. Ring size 1.5m diameter. 3. Weight limits apply.', prizePool: '৳25,000', status: 'active', imageUrl: 'https://images.unsplash.com/photo-1535378917042-10a22c95931a?w=800&q=80' }
+];
+
+export const Segments = ({ dbSegments }: { dbSegments?: SegmentData[] }) => {
   const [segments, setSegments] = useState<SegmentData[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flippedIndex, setFlippedIndex] = useState<number | null>(null);
@@ -39,18 +46,33 @@ export const Segments = () => {
 
   // Fetch segments from API
   useEffect(() => {
+    if (dbSegments && dbSegments.length > 0) {
+      setSegments(dbSegments);
+      return;
+    }
     if (mounted) {
       fetchSegments();
     }
-  }, [mounted]);
+  }, [mounted, dbSegments]);
 
   const fetchSegments = async () => {
     try {
       const response = await fetch('/api/segments');
-      const data = await response.json();
-      setSegments(data);
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setSegments(data);
+        } else {
+          console.error('Expected array of segments, received:', data);
+          setSegments([]);
+        }
+      } else {
+        console.error('Failed to fetch segments, status:', response.status);
+        setSegments([]);
+      }
     } catch (error) {
       console.error('Failed to fetch segments:', error);
+      setSegments([]);
     }
   };
 
@@ -248,10 +270,12 @@ export const Segments = () => {
         {/* Left Arrow */}
         <button
           onClick={() => {
+            if (segments.length === 0) return;
             setCurrentIndex((prev) => (prev - 1 + segments.length) % segments.length);
             setFlippedIndex(null);
           }}
-          className="absolute left-4 top-1/2 z-20 w-11 h-11 rounded-full flex items-center justify-center text-[#a3b18a] hover:scale-110 transition-all"
+          disabled={segments.length === 0}
+          className="absolute left-4 top-1/2 z-20 w-11 h-11 rounded-full flex items-center justify-center text-[#a3b18a] hover:scale-110 transition-all disabled:opacity-50 disabled:pointer-events-none"
           style={{
             transform: 'translateY(-50%)',
             background: 'rgba(18,32,22,0.7)',
@@ -266,10 +290,12 @@ export const Segments = () => {
         {/* Right Arrow */}
         <button
           onClick={() => {
+            if (segments.length === 0) return;
             setCurrentIndex((prev) => (prev + 1) % segments.length);
             setFlippedIndex(null);
           }}
-          className="absolute right-4 top-1/2 z-20 w-11 h-11 rounded-full flex items-center justify-center text-[#a3b18a] hover:scale-110 transition-all"
+          disabled={segments.length === 0}
+          className="absolute right-4 top-1/2 z-20 w-11 h-11 rounded-full flex items-center justify-center text-[#a3b18a] hover:scale-110 transition-all disabled:opacity-50 disabled:pointer-events-none"
           style={{
             transform: 'translateY(-50%)',
             background: 'rgba(18,32,22,0.7)',
