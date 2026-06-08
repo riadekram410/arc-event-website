@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Trophy, Target, Zap, Cpu, Code, Grid, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from '@/lib/router-compat';
+import { useSession } from 'next-auth/react';
 
 interface SegmentData {
   id: number;
@@ -31,6 +32,8 @@ const DUMMY_SEGMENTS: SegmentData[] = [
 ];
 
 export const Segments = ({ dbSegments }: { dbSegments?: SegmentData[] }) => {
+  const { data: session } = useSession();
+  const [registeredSegmentIds, setRegisteredSegmentIds] = useState<number[]>([]);
   const [segments, setSegments] = useState<SegmentData[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flippedIndex, setFlippedIndex] = useState<number | null>(null);
@@ -39,6 +42,23 @@ export const Segments = ({ dbSegments }: { dbSegments?: SegmentData[] }) => {
     typeof window !== 'undefined' ? window.innerWidth : 1200
   );
   const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    if (session) {
+      fetch('/api/dashboard/summary')
+        .then((res) => {
+          if (res.ok) return res.json();
+          throw new Error('Failed to load registered segments');
+        })
+        .then((data) => {
+          if (data && Array.isArray(data.events)) {
+            const ids = data.events.map((e: any) => e.segmentId).filter(Boolean);
+            setRegisteredSegmentIds(ids);
+          }
+        })
+        .catch((err) => console.error('Error fetching segment registrations:', err));
+    }
+  }, [session]);
 
   useEffect(() => {
     setMounted(true);
@@ -526,26 +546,41 @@ export const Segments = ({ dbSegments }: { dbSegments?: SegmentData[] }) => {
                       <p className="text-xs text-[#6a8a6a] leading-relaxed">{segment.rules || 'No rules specified'}</p>
                     </div>
 
-                    <div className="space-y-2 mt-auto">
-                      <button
-                        className="w-full py-2 rounded-full text-sm text-[#a3b18a] hover:text-white transition-colors"
+                    <div className="space-y-2 mt-auto" onClick={(e) => e.stopPropagation()}>
+                      <Link
+                        to={`/event/${segment.id}`}
+                        className="w-full py-2 rounded-full text-sm text-[#a3b18a] hover:text-white transition-colors text-center block"
                         style={{
                           background: 'rgba(88,129,87,0.10)',
                           border: '1px solid rgba(120,180,120,0.25)',
                         }}
                       >
                         View Details
-                      </button>
-                      <button
-                        className="w-full py-2 rounded-full text-white text-sm font-semibold transition-all hover:brightness-110"
-                        style={{
-                          background: 'linear-gradient(135deg, rgba(58,90,64,0.9) 0%, rgba(88,129,87,0.85) 100%)',
-                          border: '1px solid rgba(140,200,140,0.30)',
-                          boxShadow: '0 4px 16px rgba(58,130,80,0.25), inset 0 1px 0 rgba(255,255,255,0.10)',
-                        }}
-                      >
-                        Register Now
-                      </button>
+                      </Link>
+                      {registeredSegmentIds.includes(segment.id) ? (
+                        <button
+                          disabled
+                          className="w-full py-2 rounded-full text-gray-400 text-sm font-semibold cursor-not-allowed opacity-50 text-center block"
+                          style={{
+                            background: 'rgba(74,74,64,0.6)',
+                            border: '1px solid rgba(255,255,255,0.10)',
+                          }}
+                        >
+                          Already Registered
+                        </button>
+                      ) : (
+                        <Link
+                          to="/register"
+                          className="w-full py-2 rounded-full text-white text-sm font-semibold transition-all hover:brightness-110 text-center block"
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(58,90,64,0.9) 0%, rgba(88,129,87,0.85) 100%)',
+                            border: '1px solid rgba(140,200,140,0.30)',
+                            boxShadow: '0 4px 16px rgba(58,130,80,0.25), inset 0 1px 0 rgba(255,255,255,0.10)',
+                          }}
+                        >
+                          Register Now
+                        </Link>
+                      )}
                     </div>
                   </motion.div>
                 </div>

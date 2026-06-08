@@ -1,8 +1,9 @@
 "use client";
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Link, useNavigate, useParams } from '@/lib/router-compat';
 import { Calendar, MapPin, Clock, Trophy, Medal, ArrowLeft, FileText, Zap, Target, Shield, Award } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 
 interface DbSegment {
   id: number;
@@ -137,6 +138,26 @@ export default function EventDetailsPage({ dbSegment }: { dbSegment?: DbSegment 
       </div>
     );
   }
+
+  const { data: session } = useSession();
+  const [isRegistered, setIsRegistered] = useState(false);
+
+  useEffect(() => {
+    if (session && event?.id) {
+      fetch('/api/dashboard/summary')
+        .then((res) => {
+          if (res.ok) return res.json();
+          throw new Error('Failed to load registered segments');
+        })
+        .then((data) => {
+          if (data && Array.isArray(data.events)) {
+            const registered = data.events.some((e: any) => e.segmentId === event.id);
+            setIsRegistered(registered);
+          }
+        })
+        .catch((err) => console.error('Error fetching segment registrations:', err));
+    }
+  }, [session, event?.id]);
 
   return (
     <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6">
@@ -309,21 +330,37 @@ export default function EventDetailsPage({ dbSegment }: { dbSegment?: DbSegment 
           transition={{ delay: 0.4, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           className="flex flex-col sm:flex-row gap-4 mb-12"
         >
-          <Link
-            to="/register"
-            className="flex-1 sm:flex-none px-8 py-4 rounded-xl font-semibold text-center transition-all duration-300 hover:scale-105 shadow-lg group"
-            style={{
-              background: 'linear-gradient(135deg, #3a5a40 0%, #344e41 100%)',
-              border: '1px solid rgba(163,177,138,0.3)',
-              color: '#ffffff',
-              boxShadow: '0 8px 24px rgba(58,90,64,0.4)',
-            }}
-          >
-            <span className="inline-flex items-center gap-2">
-              Register Now
-              <Zap className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </span>
-          </Link>
+          {isRegistered ? (
+            <button
+              disabled
+              className="flex-1 sm:flex-none px-8 py-4 rounded-xl font-semibold text-center cursor-not-allowed opacity-50 text-gray-400"
+              style={{
+                background: 'rgba(74,74,64,0.6)',
+                border: '1px solid rgba(255,255,255,0.10)',
+                boxShadow: 'none',
+              }}
+            >
+              <span className="inline-flex items-center gap-2">
+                Already Registered
+              </span>
+            </button>
+          ) : (
+            <Link
+              to="/register"
+              className="flex-1 sm:flex-none px-8 py-4 rounded-xl font-semibold text-center transition-all duration-300 hover:scale-105 shadow-lg group"
+              style={{
+                background: 'linear-gradient(135deg, #3a5a40 0%, #344e41 100%)',
+                border: '1px solid rgba(163,177,138,0.3)',
+                color: '#ffffff',
+                boxShadow: '0 8px 24px rgba(58,90,64,0.4)',
+              }}
+            >
+              <span className="inline-flex items-center gap-2">
+                Register Now
+                <Zap className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </Link>
+          )}
           <a
             href={event.ruleBookUrl || undefined}
             aria-disabled={!event.ruleBookUrl}
