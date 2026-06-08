@@ -197,10 +197,10 @@ export default function RegisterPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen relative flex items-center justify-center pt-24 pb-12 px-4 sm:px-6 bg-[#0A0A0F]">
+      <div className="min-h-screen relative flex items-center justify-center pt-24 pb-12 px-4 sm:px-6 bg-background">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-10 h-10 animate-spin text-[#588157]" />
-          <p className="text-gray-400 text-sm">
+          <p className="text-sm" style={{ color: 'var(--text-body)' }}>
             Checking registration details...
           </p>
         </div>
@@ -215,7 +215,8 @@ export default function RegisterPage() {
         <div className="text-center mb-8">
           <Link
             to="/"
-            className="text-gray-400 text-sm tracking-widest hover:text-white transition-colors"
+            className="text-sm tracking-widest hover:text-[var(--text-heading)] transition-colors"
+            style={{ color: 'var(--text-body)' }}
           >
             ← BACK TO HOME
           </Link>
@@ -228,26 +229,31 @@ export default function RegisterPage() {
         >
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm mb-4 backdrop-blur-sm">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm mb-4 backdrop-blur-sm"
+              style={{
+                background: 'var(--glass-panel-bg)',
+                borderColor: 'var(--glass-panel-border)',
+                borderWidth: '1px',
+              }}
+            >
               <Trophy className="w-4 h-4 text-[#588157]" />
-              <span className="text-gray-300">
+              <span style={{ color: 'var(--text-heading)' }}>
                 {eventDetails.eventName} Registration
               </span>
             </div>
             <h1
               className="text-4xl md:text-5xl font-bold mb-3"
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              style={{ color: 'var(--text-heading)', fontFamily: "'Space Grotesk', sans-serif" }}
             >
-              Register Your <span className="text-[#a3b18a]">Team</span>
+              Register Your <span className="text-[#588157]">Team</span>
             </h1>
-            <p className="text-gray-400">
-              Join Bangladesh's most anticipated university robotics
-              championship
+            <p style={{ color: 'var(--text-body)' }}>
+              Join Bangladesh\'s most anticipated university robotics championship
             </p>
 
             {timeLeft && (
               <div className="mt-6 space-y-2 animate-in fade-in duration-500">
-                <span className="text-xs font-semibold text-[#a3b18a]/80 uppercase tracking-widest block">
+                <span className="text-xs font-semibold uppercase tracking-widest block" style={{ color: 'var(--text-label)' }}>
                   Registration Closes In
                 </span>
                 <div className="flex justify-center gap-3">
@@ -259,12 +265,17 @@ export default function RegisterPage() {
                   ].map((t, i) => (
                     <div
                       key={i}
-                      className="w-16 h-16 bg-[#111116]/90 border border-white/[0.07] rounded-xl flex flex-col items-center justify-center shadow-[0_4px_20px_rgba(0,0,0,0.25)]"
+                      className="w-16 h-16 border rounded-xl flex flex-col items-center justify-center"
+                      style={{
+                        background: 'var(--glass-panel-bg)',
+                        borderColor: 'var(--glass-panel-border)',
+                        boxShadow: 'var(--glass-panel-shadow)',
+                      }}
                     >
-                      <div className="text-[#a3b18a] font-bold text-xl font-mono leading-none">
+                      <div className="font-bold text-xl font-mono leading-none" style={{ color: 'var(--text-heading)' }}>
                         {String(t.value).padStart(2, "0")}
                       </div>
-                      <div className="text-[10px] text-gray-500 font-semibold tracking-wider mt-1 uppercase">
+                      <div className="text-[10px] font-semibold tracking-wider mt-1 uppercase" style={{ color: 'var(--text-muted)' }}>
                         {t.label}
                       </div>
                     </div>
@@ -277,19 +288,25 @@ export default function RegisterPage() {
           {/* Registration Form */}
           <form
             onSubmit={handleSubmit}
-            className="bg-[#111116]/90 backdrop-blur-xl border border-white/[0.07] rounded-2xl p-5 sm:p-8 shadow-[0_2px_12px_rgba(0,0,0,0.30)]"
+            className="backdrop-blur-xl border rounded-2xl p-5 sm:p-8"
+            style={{
+              background: 'var(--glass-panel-bg)',
+              borderColor: 'var(--glass-panel-border)',
+              boxShadow: 'var(--glass-panel-shadow)',
+            }}
           >
             <div className="space-y-5">
               {/* Team Name */}
               <div>
                 <label
                   htmlFor="teamName"
-                  className="block text-sm font-medium text-gray-300 mb-2"
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: 'var(--text-heading)' }}
                 >
                   Team Name *
                 </label>
                 <div className="relative">
-                  <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
                   <input
                     type="text"
                     id="teamName"
@@ -297,7 +314,7 @@ export default function RegisterPage() {
                     required
                     value={formData.teamName}
                     onChange={handleChange}
-                    className="w-full bg-[#18181f] border border-white/[0.07] rounded-lg px-12 py-3 text-[#F5F5F0] placeholder:text-[#5A5A52] focus:outline-none focus:border-[#588157] transition-colors"
+                    className="w-full bg-[var(--input-background)] border border-[var(--glass-panel-border)] rounded-lg px-12 py-3 text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#588157] transition-all duration-300"
                     style={{ fontSize: "16px" }}
                     placeholder="Enter your team name"
                   />
@@ -308,12 +325,13 @@ export default function RegisterPage() {
               <div>
                 <label
                   htmlFor="institution"
-                  className="block text-sm font-medium text-gray-300 mb-2"
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: 'var(--text-heading)' }}
                 >
                   Institution *
                 </label>
                 <div className="relative">
-                  <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
                   <input
                     type="text"
                     id="institution"
@@ -321,7 +339,7 @@ export default function RegisterPage() {
                     required
                     value={formData.institution}
                     onChange={handleChange}
-                    className="w-full bg-[#18181f] border border-white/[0.07] rounded-lg px-12 py-3 text-[#F5F5F0] placeholder:text-[#5A5A52] focus:outline-none focus:border-[#588157] transition-colors"
+                    className="w-full bg-[var(--input-background)] border border-[var(--glass-panel-border)] rounded-lg px-12 py-3 text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#588157] transition-all duration-300"
                     style={{ fontSize: "16px" }}
                     placeholder="Enter your university/college name"
                   />
@@ -332,12 +350,13 @@ export default function RegisterPage() {
               <div>
                 <label
                   htmlFor="teamLeader"
-                  className="block text-sm font-medium text-gray-300 mb-2"
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: 'var(--text-heading)' }}
                 >
                   Team Leader Name *
                 </label>
                 <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
                   <input
                     type="text"
                     id="teamLeader"
@@ -345,7 +364,7 @@ export default function RegisterPage() {
                     required
                     value={formData.teamLeader}
                     onChange={handleChange}
-                    className="w-full bg-[#18181f] border border-white/[0.07] rounded-lg px-12 py-3 text-[#F5F5F0] placeholder:text-[#5A5A52] focus:outline-none focus:border-[#588157] transition-colors"
+                    className="w-full bg-[var(--input-background)] border border-[var(--glass-panel-border)] rounded-lg px-12 py-3 text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#588157] transition-all duration-300"
                     style={{ fontSize: "16px" }}
                     placeholder="Enter team leader's full name"
                   />
@@ -357,12 +376,13 @@ export default function RegisterPage() {
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-sm font-medium text-gray-300 mb-2"
+                    className="block text-sm font-medium mb-2"
+                    style={{ color: 'var(--text-heading)' }}
                   >
                     Email *
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
                     <input
                       type="email"
                       id="email"
@@ -370,7 +390,7 @@ export default function RegisterPage() {
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full bg-[#18181f] border border-white/[0.07] rounded-lg px-12 py-3 text-[#F5F5F0] placeholder:text-[#5A5A52] focus:outline-none focus:border-[#588157] transition-colors"
+                      className="w-full bg-[var(--input-background)] border border-[var(--glass-panel-border)] rounded-lg px-12 py-3 text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#588157] transition-all duration-300"
                       style={{ fontSize: "16px" }}
                       placeholder="team@example.com"
                     />
@@ -380,12 +400,13 @@ export default function RegisterPage() {
                 <div>
                   <label
                     htmlFor="phone"
-                    className="block text-sm font-medium text-gray-300 mb-2"
+                    className="block text-sm font-medium mb-2"
+                    style={{ color: 'var(--text-heading)' }}
                   >
                     Phone *
                   </label>
                   <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
                     <input
                       type="tel"
                       id="phone"
@@ -393,7 +414,7 @@ export default function RegisterPage() {
                       required
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full bg-[#18181f] border border-white/[0.07] rounded-lg px-12 py-3 text-[#F5F5F0] placeholder:text-[#5A5A52] focus:outline-none focus:border-[#588157] transition-colors"
+                      className="w-full bg-[var(--input-background)] border border-[var(--glass-panel-border)] rounded-lg px-12 py-3 text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#588157] transition-all duration-300"
                       style={{ fontSize: "16px" }}
                       placeholder="+880 1XXX-XXXXXX"
                     />
@@ -405,7 +426,8 @@ export default function RegisterPage() {
               <div>
                 <label
                   htmlFor="members"
-                  className="block text-sm font-medium text-gray-300 mb-2"
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: 'var(--text-heading)' }}
                 >
                   Number of Team Members * (Between {eventDetails.minMembers}{" "}
                   and {eventDetails.maxMembers})
@@ -419,7 +441,7 @@ export default function RegisterPage() {
                   max={eventDetails.maxMembers}
                   value={formData.members}
                   onChange={handleChange}
-                  className="w-full bg-[#18181f] border border-white/[0.07] rounded-lg px-4 py-3 text-[#F5F5F0] placeholder:text-[#5A5A52] focus:outline-none focus:border-[#588157] transition-colors"
+                  className="w-full bg-[var(--input-background)] border border-[var(--glass-panel-border)] rounded-lg px-4 py-3 text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#588157] transition-all duration-300"
                   style={{ fontSize: "16px" }}
                   placeholder={`e.g., ${eventDetails.maxMembers}`}
                 />
@@ -429,7 +451,8 @@ export default function RegisterPage() {
               <div>
                 <label
                   htmlFor="segment"
-                  className="block text-sm font-medium text-gray-300 mb-2"
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: 'var(--text-heading)' }}
                 >
                   Competition Segment *
                 </label>
@@ -439,10 +462,10 @@ export default function RegisterPage() {
                   required
                   value={formData.segment}
                   onChange={handleChange}
-                  className="w-full bg-[#18181f] border border-white/[0.07] rounded-lg px-4 py-3 text-[#F5F5F0] focus:outline-none focus:border-[#588157] transition-colors"
+                  className="w-full bg-[var(--input-background)] border border-[var(--glass-panel-border)] rounded-lg px-4 py-3 text-[var(--text-heading)] focus:outline-none focus:border-[#588157] transition-all duration-300"
                   style={{ fontSize: "16px" }}
                 >
-                  <option value="" className="bg-[#18181f]">
+                  <option value="" className="bg-[var(--card)] text-[var(--text-heading)]">
                     Select a segment
                   </option>
                   {dbSegments
@@ -451,7 +474,7 @@ export default function RegisterPage() {
                       <option
                         key={seg.id}
                         value={seg.name}
-                        className="bg-[#18181f]"
+                        className="bg-[var(--card)] text-[var(--text-heading)]"
                       >
                         {seg.name}
                       </option>
@@ -463,12 +486,13 @@ export default function RegisterPage() {
               <div>
                 <label
                   htmlFor="password"
-                  className="block text-sm font-medium text-gray-300 mb-2"
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: 'var(--text-heading)' }}
                 >
                   Password * (At least 8 characters)
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
                   <input
                     type="password"
                     id="password"
@@ -476,7 +500,7 @@ export default function RegisterPage() {
                     required
                     value={formData.password}
                     onChange={handleChange}
-                    className="w-full bg-[#18181f] border border-white/[0.07] rounded-lg px-12 py-3 text-[#F5F5F0] placeholder:text-[#5A5A52] focus:outline-none focus:border-[#588157] transition-colors"
+                    className="w-full bg-[var(--input-background)] border border-[var(--glass-panel-border)] rounded-lg px-12 py-3 text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#588157] transition-all duration-300"
                     style={{ fontSize: "16px" }}
                     placeholder="Enter your password"
                   />
@@ -487,12 +511,13 @@ export default function RegisterPage() {
               <div>
                 <label
                   htmlFor="confirmPassword"
-                  className="block text-sm font-medium text-gray-300 mb-2"
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: 'var(--text-heading)' }}
                 >
                   Confirm Password *
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
                   <input
                     type="password"
                     id="confirmPassword"
@@ -500,7 +525,7 @@ export default function RegisterPage() {
                     required
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className="w-full bg-[#18181f] border border-white/[0.07] rounded-lg px-12 py-3 text-[#F5F5F0] placeholder:text-[#5A5A52] focus:outline-none focus:border-[#588157] transition-colors"
+                    className="w-full bg-[var(--input-background)] border border-[var(--glass-panel-border)] rounded-lg px-12 py-3 text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#588157] transition-all duration-300"
                     style={{ fontSize: "16px" }}
                     placeholder="Confirm your password"
                   />
@@ -525,16 +550,16 @@ export default function RegisterPage() {
             </div>
 
             {/* Footer Note */}
-            <p className="text-sm text-[#5A5A52] mt-6 text-center">
+            <p className="text-sm mt-6 text-center" style={{ color: 'var(--text-muted)' }}>
               Already registered?{" "}
-              <Link to="/login" className="text-[#588157] hover:underline">
+              <Link to="/login" className="text-[#588157] hover:underline font-semibold">
                 Login here
               </Link>
             </p>
           </form>
         </motion.div>
 
-        <div className="mt-8 text-center text-sm text-gray-500 flex items-center justify-center gap-2">
+        <div className="mt-8 text-center text-sm flex items-center justify-center gap-2" style={{ color: 'var(--text-muted)' }}>
           <ShieldCheck className="w-4 h-4" />
           <span>Secured by {eventDetails.eventName} Org</span>
         </div>
