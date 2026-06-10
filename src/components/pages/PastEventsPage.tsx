@@ -1,3 +1,4 @@
+"use client";
 import React from 'react';
 import { Highlights } from '@/components/Highlights';
 import { Link } from '@/lib/router-compat';
