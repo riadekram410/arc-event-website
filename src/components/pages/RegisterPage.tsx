@@ -21,6 +21,8 @@ import { signIn } from "next-auth/react";
 export default function RegisterPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [isSuccess, setIsSuccess] = useState(false); // Success state
+  const [showPassword, setShowPassword] = useState(false); // Password visibility toggle
   const [eventDetails, setEventDetails] = useState({
     eventName: "ARC 3.0",
     eventDate: "June 15-17, 2026",
@@ -55,16 +57,14 @@ export default function RegisterPage() {
   useEffect(() => {
     async function checkRegistration() {
       try {
-        // Fetch settings and the live segment list from the public API
         const [settingsRes, segmentsRes] = await Promise.all([
           fetch("/api/settings"),
-          fetch("/api/segments"), // Updated to point to the correct public endpoint
+          fetch("/api/segments"), // Direct segments endpoint
         ]);
 
         if (settingsRes.ok) {
           const settings = await settingsRes.json();
 
-          // Check deadline
           const deadline = settings.registration_deadline
             ? new Date(settings.registration_deadline)
             : null;
@@ -81,7 +81,6 @@ export default function RegisterPage() {
 
           if (deadline) {
             setDeadlineDate(deadline);
-            // Calculate initial time left immediately
             const difference = deadline.getTime() - Date.now();
             if (difference > 0) {
               const days = Math.floor(difference / (1000 * 60 * 60 * 24));
@@ -161,6 +160,17 @@ export default function RegisterPage() {
       });
 
       const data = await res.json();
+
+      if (res.status === 401) {
+        toast.error(
+          "You must be logged in to register. Redirecting to login...",
+        );
+        setTimeout(() => {
+          router.push("/login");
+        }, 2000);
+        return;
+      }
+
       if (res.ok) {
         toast.success(data.message || "Registration submitted successfully!");
         
@@ -180,15 +190,14 @@ export default function RegisterPage() {
         }
       } else {
         toast.error(data.message || "Failed to submit registration.");
+        setSubmitting(false);
       }
     } catch (err) {
       console.error("Error submitting registration:", err);
       toast.error("An unexpected error occurred. Please try again.");
-    } finally {
       setSubmitting(false);
     }
   };
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
@@ -209,10 +218,10 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center pt-24 pb-12 px-4 sm:px-6">
-      <div className="relative z-10 w-full max-w-3xl">
+    <div className="min-h-screen relative flex items-center justify-center pt-24 pb-12 px-4 sm:px-6 bg-[#0A0A0F]">
+      <div className="relative z-10 w-full max-w-5xl">
         {/* Nav Link */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <Link
             to="/"
             className="text-sm tracking-widest hover:text-[var(--text-heading)] transition-colors"
@@ -279,11 +288,15 @@ export default function RegisterPage() {
                         {t.label}
                       </div>
                     </div>
-                  ))}
-                </div>
+                    <div className="text-[10px] text-gray-500 font-semibold tracking-wider mt-1 uppercase">
+                      {t.label}
+                    </div>
+                  </div>
+                ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
+        </div>
 
           {/* Registration Form */}
           <form
@@ -344,7 +357,6 @@ export default function RegisterPage() {
                     placeholder="Enter your university/college name"
                   />
                 </div>
-              </div>
 
               {/* Team Leader */}
               <div>
@@ -369,58 +381,112 @@ export default function RegisterPage() {
                     placeholder="Enter team leader's full name"
                   />
                 </div>
-              </div>
 
-              {/* Email & Phone Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                {/* Team Leader / Full Name */}
                 <div>
                   <label
                     htmlFor="email"
                     className="block text-sm font-medium mb-2"
                     style={{ color: 'var(--text-heading)' }}
                   >
-                    Email *
+                    Full Name (Team Leader) *
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
                     <input
-                      type="email"
-                      id="email"
-                      name="email"
+                      type="text"
+                      id="teamLeader"
+                      name="teamLeader"
                       required
-                      value={formData.email}
+                      value={formData.teamLeader}
                       onChange={handleChange}
                       className="w-full bg-[var(--input-background)] border border-[var(--glass-panel-border)] rounded-lg px-12 py-3 text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#588157] transition-all duration-300"
                       style={{ fontSize: "16px" }}
-                      placeholder="team@example.com"
+                      placeholder="Enter your full name"
                     />
                   </div>
                 </div>
 
+                {/* Email & Phone Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div>
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium text-gray-300 mb-2"
+                    >
+                      Email Address *
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        required
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="w-full bg-[#18181f] border border-white/[0.07] rounded-lg px-12 py-3 text-[#F5F5F0] placeholder:text-[#5A5A52] focus:outline-none focus:border-[#588157] transition-colors"
+                        style={{ fontSize: "16px" }}
+                        placeholder="team@example.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="phone"
+                      className="block text-sm font-medium text-gray-300 mb-2"
+                    >
+                      Phone Number *
+                    </label>
+                    <div className="relative">
+                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        required
+                        value={formData.phone}
+                        onChange={handleChange}
+                        className="w-full bg-[#18181f] border border-white/[0.07] rounded-lg px-12 py-3 text-[#F5F5F0] placeholder:text-[#5A5A52] focus:outline-none focus:border-[#588157] transition-colors"
+                        style={{ fontSize: "16px" }}
+                        placeholder="+880 1XXX-XXXXXX"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Secure Password Field (Added!) */}
                 <div>
                   <label
                     htmlFor="phone"
                     className="block text-sm font-medium mb-2"
                     style={{ color: 'var(--text-heading)' }}
                   >
-                    Phone *
+                    Account Password * (Minimum 8 characters)
                   </label>
                   <div className="relative">
                     <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
                     <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
+                      type={showPassword ? "text" : "password"}
+                      id="password"
+                      name="password"
                       required
-                      value={formData.phone}
+                      value={formData.password}
                       onChange={handleChange}
                       className="w-full bg-[var(--input-background)] border border-[var(--glass-panel-border)] rounded-lg px-12 py-3 text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#588157] transition-all duration-300"
                       style={{ fontSize: "16px" }}
-                      placeholder="+880 1XXX-XXXXXX"
+                      placeholder="Choose a password for your portal"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors text-xs font-semibold uppercase tracking-wider"
+                    >
+                      {showPassword ? "Hide" : "Show"}
+                    </button>
                   </div>
                 </div>
-              </div>
 
               {/* Number of Members */}
               <div>
@@ -538,16 +604,13 @@ export default function RegisterPage() {
                 disabled={submitting}
                 className="w-full bg-[#3a5a40] text-white py-4 rounded-lg font-semibold hover:bg-[#344e41] transition-all hover:scale-[1.02] shadow-[0_2px_12px_rgba(0,0,0,0.20)] flex items-center justify-center gap-2 mt-6 disabled:opacity-75 disabled:cursor-not-allowed"
               >
-                {submitting ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <>
-                    Submit Registration
-                    <ArrowRight className="w-5 h-5" />
-                  </>
-                )}
-              </button>
-            </div>
+                <ShieldCheck className="w-5 h-5 text-[#588157]" />
+                Participant Benefits
+              </h3>
+              <p className="text-sm text-gray-400 mb-6 leading-relaxed">
+                By completing this registration, a secure personal account will
+                automatically be set up for you. Here's what you will get:
+              </p>
 
             {/* Footer Note */}
             <p className="text-sm mt-6 text-center" style={{ color: 'var(--text-muted)' }}>
